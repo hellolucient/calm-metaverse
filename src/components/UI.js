@@ -12,7 +12,6 @@ function UI() {
   const joystickContainerRef = useRef(null);
 
   useEffect(() => {
-    // Only create joystick on touch devices
     if ('ontouchstart' in window && joystickContainerRef.current) {
       joystickRef.current = nipplejs.create({
         zone: joystickContainerRef.current,
@@ -20,17 +19,52 @@ function UI() {
         position: { left: '100px', bottom: '100px' },
         color: 'white',
         size: 120,
-        fadeTime: 0
+        fadeTime: 0,
+        multitouch: false,
+        maxNumberOfNipples: 1,
+        threshold: 0.3,
+        restOpacity: 0.5
       });
 
-      // Emit keyboard events based on joystick movement
+      // Add directional indicators
+      const container = joystickContainerRef.current;
+      const arrows = [
+        { transform: 'rotate(0deg)', text: '→' },
+        { transform: 'rotate(90deg)', text: '→' },
+        { transform: 'rotate(180deg)', text: '→' },
+        { transform: 'rotate(270deg)', text: '→' }
+      ];
+
+      arrows.forEach(({ transform, text }) => {
+        const arrow = document.createElement('div');
+        arrow.textContent = text;
+        arrow.style.position = 'absolute';
+        arrow.style.top = '50%';
+        arrow.style.left = '50%';
+        arrow.style.transform = `translate(-50%, -50%) ${transform}`;
+        arrow.style.color = 'rgba(255,255,255,0.3)';
+        arrow.style.fontSize = '24px';
+        arrow.style.pointerEvents = 'none';
+        container.appendChild(arrow);
+      });
+
+      // Prevent text selection
+      container.style.userSelect = 'none';
+      container.style.webkitUserSelect = 'none';
+      container.style.msUserSelect = 'none';
+
+      // Emit keyboard events based on joystick movement with reduced frequency
+      let lastEmitTime = 0;
       joystickRef.current.on('move', (evt, data) => {
-        const angle = data.angle.degree;
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: getKeyFromAngle(angle) }));
+        const now = Date.now();
+        if (now - lastEmitTime > 50) { // Throttle to every 50ms
+          const angle = data.angle.degree;
+          window.dispatchEvent(new KeyboardEvent('keydown', { key: getKeyFromAngle(angle) }));
+          lastEmitTime = now;
+        }
       });
 
       joystickRef.current.on('end', () => {
-        // Clear all movement when joystick is released
         ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].forEach(key => {
           window.dispatchEvent(new KeyboardEvent('keyup', { key }));
         });
@@ -119,7 +153,8 @@ function UI() {
             width: '200px',
             height: '200px',
             zIndex: 1000,
-            opacity: 0.7
+            opacity: 0.7,
+            touchAction: 'none'
           }}
         />
       )}

@@ -1,23 +1,26 @@
-import logo from './logo.svg';
+import React from 'react';
+import { Canvas } from '@react-three/fiber';
+import { KeyboardControls } from '@react-three/drei';
+import Scene from './components/Scene';
+import UI from './components/UI';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <KeyboardControls
+        map={[
+          { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
+          { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
+          { name: 'left', keys: ['ArrowLeft', 'KeyA'] },
+          { name: 'right', keys: ['ArrowRight', 'KeyD'] },
+        ]}
+      >
+        <Canvas>
+          <Scene />
+        </Canvas>
+      </KeyboardControls>
+      <UI />
     </div>
   );
 }

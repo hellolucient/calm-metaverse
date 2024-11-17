@@ -9,9 +9,10 @@ function Scene() {
   const avatarRef = useRef();
   const controlsRef = useRef();
 
-  // Expose avatarRef globally
+  // Expose both refs globally
   useEffect(() => {
     window.avatarRef = avatarRef;
+    window.controlsRef = controlsRef;
   }, []);
 
   useFrame(() => {

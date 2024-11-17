@@ -23,37 +23,52 @@ function UI() {
           Math.pow(pos.z, 2)
         );
 
-        // Check if avatar is near grid boundaries
+        // Check if avatar is near grid boundaries or too far from center
         const isNearBoundary = Math.abs(pos.x) > 45 || Math.abs(pos.z) > 45;
+        const isTooFar = distanceFromCenter > 20; // Reduced from 30 to 20 to show button earlier
         
-        // Show button if avatar is too far from center or near boundaries
-        setShowHomeButton(distanceFromCenter > 30 || isNearBoundary);
+        setShowHomeButton(isNearBoundary || isTooFar);
       }
     };
 
-    checkIntervalRef.current = setInterval(checkPosition, 1000);
+    checkIntervalRef.current = setInterval(checkPosition, 500); // Check more frequently
     return () => clearInterval(checkIntervalRef.current);
   }, []);
 
-  // Return home function - add smooth transition
+  // Return home function - reset position and camera
   const returnHome = () => {
-    if (window.avatarRef && window.avatarRef.current) {
+    if (window.avatarRef && window.avatarRef.current && window.controlsRef && window.controlsRef.current) {
       // Store current position
       const startX = window.avatarRef.current.position.x;
       const startZ = window.avatarRef.current.position.z;
       const startTime = Date.now();
-      const duration = 1000; // 1 second transition
+      const duration = 1000;
+
+      // Get initial camera position
+      const controls = window.controlsRef.current;
+      const startCamDistance = controls.getDistance();
+      const startCamPolarAngle = controls.getPolarAngle();
+      const startCamAzimuthAngle = controls.getAzimuthalAngle();
+
+      // Target values
+      const targetCamDistance = 15; // Initial camera distance
+      const targetCamPolarAngle = Math.PI / 4; // Initial polar angle
+      const targetCamAzimuthAngle = 0; // Initial azimuth angle
 
       // Animate movement
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
-        // Ease out cubic
         const easing = 1 - Math.pow(1 - progress, 3);
-        
+
+        // Move avatar
         window.avatarRef.current.position.x = startX * (1 - easing);
         window.avatarRef.current.position.z = startZ * (1 - easing);
+
+        // Move camera
+        controls.dolly(startCamDistance + (targetCamDistance - startCamDistance) * easing);
+        controls.rotatePolarTo(startCamPolarAngle + (targetCamPolarAngle - startCamPolarAngle) * easing);
+        controls.rotateAzimuthTo(startCamAzimuthAngle + (targetCamAzimuthAngle - startCamAzimuthAngle) * easing);
 
         if (progress < 1) {
           requestAnimationFrame(animate);

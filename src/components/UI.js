@@ -38,36 +38,48 @@ function UI() {
   // Return home function - reset position and camera
   const returnHome = () => {
     if (window.avatarRef && window.avatarRef.current && window.controlsRef && window.controlsRef.current) {
-      // Store current position
-      const startX = window.avatarRef.current.position.x;
-      const startZ = window.avatarRef.current.position.z;
       const startTime = Date.now();
       const duration = 1000;
 
-      // Get initial camera position
+      // Store starting positions
+      const startX = window.avatarRef.current.position.x;
+      const startZ = window.avatarRef.current.position.z;
       const controls = window.controlsRef.current;
-      const startTarget = controls.target.clone();
+      
+      // Initial/target values
+      const targetX = 0;
+      const targetZ = 0;
+      const targetDistance = 15;
+      const targetPolarAngle = Math.PI / 3; // About 60 degrees
+      const targetAzimuthAngle = 0;
 
-      // Animate movement
+      // Store starting camera values
+      const startDistance = controls.getDistance();
+      const startPolar = controls.getPolarAngle();
+      const startAzimuth = controls.getAzimuthalAngle();
+
       const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
         const easing = 1 - Math.pow(1 - progress, 3);
 
         // Move avatar
-        window.avatarRef.current.position.x = startX * (1 - easing);
-        window.avatarRef.current.position.z = startZ * (1 - easing);
+        window.avatarRef.current.position.x = startX + (targetX - startX) * easing;
+        window.avatarRef.current.position.z = startZ + (targetZ - startZ) * easing;
 
-        // Move camera target
-        controls.target.set(
-          startTarget.x * (1 - easing),
-          startTarget.y,
-          startTarget.z * (1 - easing)
-        );
+        // Move camera
+        controls.setAzimuthalAngle(startAzimuth + (targetAzimuthAngle - startAzimuth) * easing);
+        controls.setPolarAngle(startPolar + (targetPolarAngle - startPolar) * easing);
+        controls.dollyTo(startDistance + (targetDistance - startDistance) * easing);
 
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
+          // Ensure final positions are exact
+          window.avatarRef.current.position.set(0, 0, 0);
+          controls.setAzimuthalAngle(targetAzimuthAngle);
+          controls.setPolarAngle(targetPolarAngle);
+          controls.dollyTo(targetDistance);
           setShowHomeButton(false);
         }
       };

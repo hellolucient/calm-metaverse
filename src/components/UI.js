@@ -48,9 +48,9 @@ function UI() {
       
       // Initial camera position
       const targetCameraPosition = {
-        x: 10,
-        y: 10,
-        z: 10
+        x: 8,
+        y: 8,
+        z: 8
       };
 
       // Store starting camera position
@@ -86,7 +86,7 @@ function UI() {
         } else {
           // Ensure final positions are exact
           window.avatarRef.current.position.set(0, 0, 0);
-          controls.object.position.set(10, 10, 10);
+          controls.object.position.set(8, 8, 8);
           controls.target.set(0, 1, 0);
           setShowHomeButton(false);
         }

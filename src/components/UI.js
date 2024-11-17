@@ -7,6 +7,46 @@ import { playAudioWithFadeIn, stopAudioWithFadeOut } from './MeditationSpots';
 function UI() {
   const joystickRef = useRef(null);
   const joystickContainerRef = useRef(null);
+  const [showHomeButton, setShowHomeButton] = useState(false);
+  const lastPositionRef = useRef({ x: 0, z: 0 });
+  const checkIntervalRef = useRef(null);
+
+  // Function to return avatar to starting position
+  const returnHome = () => {
+    if (window.avatarRef && window.avatarRef.current) {
+      window.avatarRef.current.position.x = 0;
+      window.avatarRef.current.position.z = 0;
+      setShowHomeButton(false);
+    }
+  };
+
+  // Check if avatar is far from meditation spots
+  useEffect(() => {
+    const checkPosition = () => {
+      if (window.avatarRef && window.avatarRef.current) {
+        const pos = window.avatarRef.current.position;
+        const meditationSpots = [
+          { x: 5, z: 5 },
+          { x: -5, z: -5 },
+          { x: 10, z: -10 }
+        ];
+
+        // Check distance to all meditation spots
+        const nearSpot = meditationSpots.some(spot => {
+          const distance = Math.sqrt(
+            Math.pow(pos.x - spot.x, 2) + 
+            Math.pow(pos.z - spot.z, 2)
+          );
+          return distance < 15; // Show button if not near any spot
+        });
+
+        setShowHomeButton(!nearSpot);
+      }
+    };
+
+    checkIntervalRef.current = setInterval(checkPosition, 2000);
+    return () => clearInterval(checkIntervalRef.current);
+  }, []);
 
   useEffect(() => {
     if ('ontouchstart' in window && joystickContainerRef.current) {
@@ -99,6 +139,32 @@ function UI() {
             touchAction: 'none'
           }}
         />
+      )}
+
+      {/* Home button */}
+      {showHomeButton && (
+        <button
+          onClick={returnHome}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            padding: '10px 20px',
+            backgroundColor: 'rgba(74, 144, 226, 0.7)',
+            border: 'none',
+            borderRadius: '5px',
+            color: 'white',
+            cursor: 'pointer',
+            fontFamily: 'Arial, sans-serif',
+            fontSize: '16px',
+            zIndex: 1000,
+            transition: 'background-color 0.3s'
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(74, 144, 226, 0.9)'}
+          onMouseOut={(e) => e.target.style.backgroundColor = 'rgba(74, 144, 226, 0.7)'}
+        >
+          Return Home
+        </button>
       )}
     </>
   );

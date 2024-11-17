@@ -46,12 +46,12 @@ function UI() {
       const startZ = window.avatarRef.current.position.z;
       const controls = window.controlsRef.current;
       
-      // Initial/target values
+      // Initial/target values - adjusted to match initial view
       const targetX = 0;
       const targetZ = 0;
       const targetDistance = 15;
-      const targetPolarAngle = Math.PI / 3; // About 60 degrees
-      const targetAzimuthAngle = 0;
+      const targetPolarAngle = Math.PI / 4; // 45 degrees
+      const targetAzimuthAngle = -Math.PI / 4; // -45 degrees
 
       // Store starting camera values
       const startDistance = controls.getDistance();
@@ -67,7 +67,14 @@ function UI() {
         window.avatarRef.current.position.x = startX + (targetX - startX) * easing;
         window.avatarRef.current.position.z = startZ + (targetZ - startZ) * easing;
 
-        // Move camera
+        // Move camera target
+        controls.target.set(
+          window.avatarRef.current.position.x,
+          1, // Keep camera looking at avatar's head
+          window.avatarRef.current.position.z
+        );
+
+        // Adjust camera angles
         controls.setAzimuthalAngle(startAzimuth + (targetAzimuthAngle - startAzimuth) * easing);
         controls.setPolarAngle(startPolar + (targetPolarAngle - startPolar) * easing);
         controls.dollyTo(startDistance + (targetDistance - startDistance) * easing);
@@ -77,6 +84,7 @@ function UI() {
         } else {
           // Ensure final positions are exact
           window.avatarRef.current.position.set(0, 0, 0);
+          controls.target.set(0, 1, 0);
           controls.setAzimuthalAngle(targetAzimuthAngle);
           controls.setPolarAngle(targetPolarAngle);
           controls.dollyTo(targetDistance);

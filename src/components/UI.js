@@ -11,42 +11,60 @@ function UI() {
   const lastPositionRef = useRef({ x: 0, z: 0 });
   const checkIntervalRef = useRef(null);
 
-  // Function to return avatar to starting position
-  const returnHome = () => {
-    if (window.avatarRef && window.avatarRef.current) {
-      window.avatarRef.current.position.x = 0;
-      window.avatarRef.current.position.z = 0;
-      setShowHomeButton(false);
-    }
-  };
-
-  // Check if avatar is far from meditation spots
+  // Check if avatar is lost or at grid boundaries
   useEffect(() => {
     const checkPosition = () => {
       if (window.avatarRef && window.avatarRef.current) {
         const pos = window.avatarRef.current.position;
-        const meditationSpots = [
-          { x: 5, z: 5 },
-          { x: -5, z: -5 },
-          { x: 10, z: -10 }
-        ];
+        
+        // Check if avatar is too far from center
+        const distanceFromCenter = Math.sqrt(
+          Math.pow(pos.x, 2) + 
+          Math.pow(pos.z, 2)
+        );
 
-        // Check distance to all meditation spots
-        const nearSpot = meditationSpots.some(spot => {
-          const distance = Math.sqrt(
-            Math.pow(pos.x - spot.x, 2) + 
-            Math.pow(pos.z - spot.z, 2)
-          );
-          return distance < 15; // Show button if not near any spot
-        });
-
-        setShowHomeButton(!nearSpot);
+        // Check if avatar is near grid boundaries
+        const isNearBoundary = Math.abs(pos.x) > 45 || Math.abs(pos.z) > 45;
+        
+        // Show button if avatar is too far from center or near boundaries
+        setShowHomeButton(distanceFromCenter > 30 || isNearBoundary);
       }
     };
 
-    checkIntervalRef.current = setInterval(checkPosition, 2000);
+    checkIntervalRef.current = setInterval(checkPosition, 1000);
     return () => clearInterval(checkIntervalRef.current);
   }, []);
+
+  // Return home function - add smooth transition
+  const returnHome = () => {
+    if (window.avatarRef && window.avatarRef.current) {
+      // Store current position
+      const startX = window.avatarRef.current.position.x;
+      const startZ = window.avatarRef.current.position.z;
+      const startTime = Date.now();
+      const duration = 1000; // 1 second transition
+
+      // Animate movement
+      const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Ease out cubic
+        const easing = 1 - Math.pow(1 - progress, 3);
+        
+        window.avatarRef.current.position.x = startX * (1 - easing);
+        window.avatarRef.current.position.z = startZ * (1 - easing);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          setShowHomeButton(false);
+        }
+      };
+
+      animate();
+    }
+  };
 
   useEffect(() => {
     if ('ontouchstart' in window && joystickContainerRef.current) {

@@ -210,6 +210,31 @@ function LightBeam({ position, color, warmupStage }) {
   );
 }
 
+function Beacon({ position, color }) {
+  const beaconRef = useRef();
+  
+  useFrame((state) => {
+    const t = state.clock.getElapsedTime();
+    // Create a pulsing effect using sine wave
+    const pulse = Math.sin(t * 2) * 0.5 + 0.5; // Oscillates between 0 and 1
+    if (beaconRef.current) {
+      beaconRef.current.material.opacity = pulse * 0.3; // Adjust max opacity
+      beaconRef.current.scale.y = 1 + pulse; // Pulse height
+    }
+  });
+
+  return (
+    <mesh position={[position[0], 5, position[2]]} ref={beaconRef}>
+      <cylinderGeometry args={[0.2, 0.2, 10, 8]} />
+      <meshBasicMaterial 
+        color={color} 
+        transparent={true} 
+        opacity={0.3}
+      />
+    </mesh>
+  );
+}
+
 function MeditationSpots({ avatarRef }) {
   const [activeSpot, setActiveSpot] = useState(null);
   const [warmupStage, setWarmupStage] = useState(0);
@@ -304,6 +329,15 @@ function MeditationSpots({ avatarRef }) {
             />
           </mesh>
           
+          {/* Add beacon for inactive spots */}
+          {index !== activeSpot && (
+            <Beacon 
+              position={spot.position} 
+              color={spot.color}
+            />
+          )}
+          
+          {/* Existing LightBeam for active spot */}
           {index === activeSpot && (
             <LightBeam 
               position={spot.position} 

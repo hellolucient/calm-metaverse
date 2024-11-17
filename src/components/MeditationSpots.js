@@ -212,26 +212,51 @@ function LightBeam({ position, color, warmupStage }) {
 
 function Beacon({ position, color }) {
   const beaconRef = useRef();
+  const particlesRef = useRef();
+  const particleCount = 15;
+  const particlePositions = useRef(
+    [...Array(particleCount)].map(() => ({
+      y: Math.random() * 10,
+      radius: 0.2 + Math.random() * 0.3,
+      angle: Math.random() * Math.PI * 2,
+      speed: 1 + Math.random()
+    }))
+  );
   
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
     // Create a pulsing effect using sine wave
-    const pulse = Math.sin(t * 2) * 0.5 + 0.5; // Oscillates between 0 and 1
-    if (beaconRef.current) {
-      beaconRef.current.material.opacity = pulse * 0.3; // Adjust max opacity
-      beaconRef.current.scale.y = 1 + pulse; // Pulse height
-    }
+    const pulse = Math.sin(t * 1.5) * 0.5 + 0.5; // Oscillates between 0 and 1
+
+    // Update particles
+    particlePositions.current.forEach((particle, i) => {
+      particle.y += particle.speed * delta;
+      if (particle.y > 10) particle.y = 0;
+      
+      const mesh = particlesRef.current.children[i];
+      mesh.position.y = particle.y;
+      mesh.position.x = Math.cos(particle.angle + t * 0.5) * particle.radius;
+      mesh.position.z = Math.sin(particle.angle + t * 0.5) * particle.radius;
+      mesh.material.opacity = (1 - particle.y / 10) * pulse * 0.5;
+    });
   });
 
   return (
-    <mesh position={[position[0], 5, position[2]]} ref={beaconRef}>
-      <cylinderGeometry args={[0.2, 0.2, 10, 8]} />
-      <meshBasicMaterial 
-        color={color} 
-        transparent={true} 
-        opacity={0.3}
-      />
-    </mesh>
+    <group position={[position[0], 0.1, position[2]]}>
+      {/* Spiral particles */}
+      <group ref={particlesRef}>
+        {[...Array(particleCount)].map((_, i) => (
+          <mesh key={i}>
+            <sphereGeometry args={[0.05, 8, 8]} />
+            <meshBasicMaterial 
+              color={color} 
+              transparent={true} 
+              opacity={0.5}
+            />
+          </mesh>
+        ))}
+      </group>
+    </group>
   );
 }
 
@@ -242,9 +267,9 @@ function MeditationSpots({ avatarRef }) {
   const audioPlayingRef = useRef(false);
   
   const spots = [
-    { position: [5, 0, 5], color: '#4A90E2', activeColor: '#00FF00' },
-    { position: [-5, 0, -5], color: '#5D9CEC', activeColor: '#FF00FF' },
-    { position: [10, 0, -10], color: '#4FC1E9', activeColor: '#FF0000' },
+    { position: [5, 0, 5], color: '#4A90E2', activeColor: '#4FC3F7' },    // Light blue
+    { position: [-5, 0, -5], color: '#81C784', activeColor: '#66BB6A' },  // Green
+    { position: [10, 0, -10], color: '#BA68C8', activeColor: '#AB47BC' }, // Purple
   ];
 
   useEffect(() => {

@@ -46,17 +46,19 @@ function UI() {
       const startZ = window.avatarRef.current.position.z;
       const controls = window.controlsRef.current;
       
-      // Initial/target values - adjusted to match initial view
-      const targetX = 0;
-      const targetZ = 0;
-      const targetDistance = 15;
-      const targetPolarAngle = Math.PI / 4; // 45 degrees
-      const targetAzimuthAngle = -Math.PI / 4; // -45 degrees
+      // Initial camera position
+      const targetCameraPosition = {
+        x: 10,
+        y: 10,
+        z: 10
+      };
 
-      // Store starting camera values
-      const startDistance = controls.getDistance();
-      const startPolar = controls.getPolarAngle();
-      const startAzimuth = controls.getAzimuthalAngle();
+      // Store starting camera position
+      const startCameraPosition = {
+        x: controls.object.position.x,
+        y: controls.object.position.y,
+        z: controls.object.position.z
+      };
 
       const animate = () => {
         const elapsed = Date.now() - startTime;
@@ -64,30 +66,28 @@ function UI() {
         const easing = 1 - Math.pow(1 - progress, 3);
 
         // Move avatar
-        window.avatarRef.current.position.x = startX + (targetX - startX) * easing;
-        window.avatarRef.current.position.z = startZ + (targetZ - startZ) * easing;
+        window.avatarRef.current.position.x = startX * (1 - easing);
+        window.avatarRef.current.position.z = startZ * (1 - easing);
 
-        // Move camera target
+        // Move camera
+        controls.object.position.x = startCameraPosition.x + (targetCameraPosition.x - startCameraPosition.x) * easing;
+        controls.object.position.y = startCameraPosition.y + (targetCameraPosition.y - startCameraPosition.y) * easing;
+        controls.object.position.z = startCameraPosition.z + (targetCameraPosition.z - startCameraPosition.z) * easing;
+
+        // Update target
         controls.target.set(
           window.avatarRef.current.position.x,
-          1, // Keep camera looking at avatar's head
+          1,
           window.avatarRef.current.position.z
         );
-
-        // Adjust camera angles
-        controls.setAzimuthalAngle(startAzimuth + (targetAzimuthAngle - startAzimuth) * easing);
-        controls.setPolarAngle(startPolar + (targetPolarAngle - startPolar) * easing);
-        controls.dollyTo(startDistance + (targetDistance - startDistance) * easing);
 
         if (progress < 1) {
           requestAnimationFrame(animate);
         } else {
           // Ensure final positions are exact
           window.avatarRef.current.position.set(0, 0, 0);
+          controls.object.position.set(10, 10, 10);
           controls.target.set(0, 1, 0);
-          controls.setAzimuthalAngle(targetAzimuthAngle);
-          controls.setPolarAngle(targetPolarAngle);
-          controls.dollyTo(targetDistance);
           setShowHomeButton(false);
         }
       };

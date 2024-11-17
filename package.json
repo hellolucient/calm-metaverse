@@ -1,23 +1,23 @@
 {
-  "name": "wellness-metaverse",
+  "name": "calm-metaverse",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@react-three/drei": "^9.88.7",
-    "@react-three/fiber": "^8.15.11",
-    "@testing-library/jest-dom": "^5.17.0",
+    "@react-three/drei": "^9.0.0",
+    "@react-three/fiber": "^8.0.0",
+    "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "nipplejs": "^0.10.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "^3.0.1",
-    "three": "^0.158.0",
+    "nipplejs": "^0.10.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "three": "^0.150.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "export SET NODE_OPTIONS=--openssl-legacy-provider && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -38,5 +38,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "engines": {
+    "node": "16.x"
   }
 }

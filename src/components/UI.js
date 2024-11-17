@@ -46,14 +46,7 @@ function UI() {
 
       // Get initial camera position
       const controls = window.controlsRef.current;
-      const startCamDistance = controls.getDistance();
-      const startCamPolarAngle = controls.getPolarAngle();
-      const startCamAzimuthAngle = controls.getAzimuthalAngle();
-
-      // Target values
-      const targetCamDistance = 15; // Initial camera distance
-      const targetCamPolarAngle = Math.PI / 4; // Initial polar angle
-      const targetCamAzimuthAngle = 0; // Initial azimuth angle
+      const startTarget = controls.target.clone();
 
       // Animate movement
       const animate = () => {
@@ -65,10 +58,12 @@ function UI() {
         window.avatarRef.current.position.x = startX * (1 - easing);
         window.avatarRef.current.position.z = startZ * (1 - easing);
 
-        // Move camera
-        controls.dolly(startCamDistance + (targetCamDistance - startCamDistance) * easing);
-        controls.rotatePolarTo(startCamPolarAngle + (targetCamPolarAngle - startCamPolarAngle) * easing);
-        controls.rotateAzimuthTo(startCamAzimuthAngle + (targetCamAzimuthAngle - startCamAzimuthAngle) * easing);
+        // Move camera target
+        controls.target.set(
+          startTarget.x * (1 - easing),
+          startTarget.y,
+          startTarget.z * (1 - easing)
+        );
 
         if (progress < 1) {
           requestAnimationFrame(animate);

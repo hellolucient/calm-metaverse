@@ -13,6 +13,12 @@ function Scene() {
   useEffect(() => {
     window.avatarRef = avatarRef;
     window.controlsRef = controlsRef;
+
+    // Set initial camera position
+    if (controlsRef.current) {
+      controlsRef.current.object.position.set(15, 12, 15);
+      controlsRef.current.target.set(0, 1, 0);
+    }
   }, []);
 
   useFrame(() => {

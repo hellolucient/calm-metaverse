@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { OrbitControls, Text } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import Environment from './Environment';
@@ -8,6 +8,11 @@ import Avatar from './Avatar';
 function Scene() {
   const avatarRef = useRef();
   const controlsRef = useRef();
+
+  // Expose avatarRef globally
+  useEffect(() => {
+    window.avatarRef = avatarRef;
+  }, []);
 
   useFrame(() => {
     if (avatarRef.current && controlsRef.current) {

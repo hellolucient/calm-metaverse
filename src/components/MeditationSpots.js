@@ -213,22 +213,20 @@ function LightBeam({ position, color, warmupStage }) {
 function Beacon({ position, color }) {
   const beaconRef = useRef();
   const particlesRef = useRef();
-  const particleCount = 15;
+  const particleCount = 50;
   const particlePositions = useRef(
     [...Array(particleCount)].map(() => ({
       y: Math.random() * 10,
-      radius: 0.2 + Math.random() * 0.3,
+      radius: 0.1 + Math.random() * 0.4,
       angle: Math.random() * Math.PI * 2,
-      speed: 1 + Math.random()
+      speed: 0.8 + Math.random() * 0.4
     }))
   );
   
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime();
-    // Create a pulsing effect using sine wave
-    const pulse = Math.sin(t * 1.5) * 0.5 + 0.5; // Oscillates between 0 and 1
+    const pulse = Math.sin(t * 1.5) * 0.5 + 0.5;
 
-    // Update particles
     particlePositions.current.forEach((particle, i) => {
       particle.y += particle.speed * delta;
       if (particle.y > 10) particle.y = 0;
@@ -237,21 +235,20 @@ function Beacon({ position, color }) {
       mesh.position.y = particle.y;
       mesh.position.x = Math.cos(particle.angle + t * 0.5) * particle.radius;
       mesh.position.z = Math.sin(particle.angle + t * 0.5) * particle.radius;
-      mesh.material.opacity = (1 - particle.y / 10) * pulse * 0.5;
+      mesh.material.opacity = (1 - particle.y / 10) * pulse * 0.7;
     });
   });
 
   return (
     <group position={[position[0], 0.1, position[2]]}>
-      {/* Spiral particles */}
       <group ref={particlesRef}>
         {[...Array(particleCount)].map((_, i) => (
           <mesh key={i}>
-            <sphereGeometry args={[0.05, 8, 8]} />
+            <sphereGeometry args={[0.04, 8, 8]} />
             <meshBasicMaterial 
               color={color} 
               transparent={true} 
-              opacity={0.5}
+              opacity={0.7}
             />
           </mesh>
         ))}

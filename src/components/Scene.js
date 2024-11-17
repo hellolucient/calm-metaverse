@@ -16,8 +16,8 @@ function Scene() {
 
     // Set initial camera position
     if (controlsRef.current) {
-      controlsRef.current.object.position.set(8, 8, 4);
-      controlsRef.current.target.set(0, 1, -2);
+      controlsRef.current.object.position.set(0, 6, 12);
+      controlsRef.current.target.set(0, 1, -8);
     }
   }, []);
 
